@@ -12,9 +12,8 @@
 #SBATCH --error=logs/errors/errors_glove_model_reg_1e-5.txt
 ## Imports
 import os
-os.chdir("/gpfs/commons/projects/ukbb-gursoylab/aelhussein")
 import sys
-sys.path.append("/gpfs/commons/projects/ukbb-gursoylab/aelhussein")
+from pathlib import Path
 import time
 import pickle
 import numpy as np
@@ -23,7 +22,6 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(device, flush = True)
 
 ## Choose model and specify iteration
 """
@@ -140,7 +138,7 @@ class Glove(nn.Module):
         else:
             self.embeddings_v.weight.data.uniform_(-0.5, 0.5)
             self.embeddings_u.weight.data.uniform_(-0.5, 0.5)
-        self.initial_embeddings = self.embeddings_u.weight.data.clone().to(device)
+        self.register_buffer("initial_embeddings", self.embeddings_u.weight.data.clone(), persistent=False)
         self.biases_v.weight.data.fill_(0)
         self.biases_u.weight.data.fill_(0)
         self.lambd = lambd
@@ -171,7 +169,7 @@ class Glove(nn.Module):
             reg_loss = self.lambd * (torch.sum(reg_dist_i) + torch.sum(reg_dist_j))
             loss += reg_loss
             return loss, reg_loss
-        return loss, torch.zeros_like(loss).to(device)
+        return loss, torch.zeros_like(loss)
 
 
 def train_glove(cooc_matrix, embedding_size, lr, num_epochs, batch_size, x_max, alpha, model_path, embeddings_init=None, lambd = None, reg_norm=None):
@@ -244,6 +242,12 @@ def save_model_embeddings(model, EMBEDDING_PATH, MODEL_NUM, EMBEDDING_SIZE, DATA
                 pickle.dump(embeddings_array, f)
 
 if __name__ == "__main__":
+
+    if len(sys.argv) > 1:
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+        from keep_preprocessing.consumers import glove_main
+        glove_main(Glove)
+        raise SystemExit(0)
 
 
     ## Load data

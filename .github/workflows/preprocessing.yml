@@ -1,0 +1,32 @@
+name: Synthetic preprocessing
+on:
+  pull_request:
+  push:
+    paths:
+      - 'keep_preprocessing/**'
+      - 'keep_reference/**'
+      - 'tests/**'
+      - 'trained_embeddings/our_embeddings/**'
+      - 'requirements-*.lock'
+      - 'scripts/validate_c0014.py'
+      - '.github/workflows/preprocessing.yml'
+      - 'pyproject.toml'
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run --python 3.12 --no-project --with pytest==9.2.0 python -m pytest -q tests/test_reference.py
+  validate:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.12
+      - run: uv venv --python 3.12 .venv-preprocessing
+      - run: uv pip sync --python .venv-preprocessing/bin/python requirements-preprocessing.lock
+      - run: uv venv --python 3.12 .venv
+      - run: uv pip sync --python .venv/bin/python requirements-training.lock
+      - run: .venv-preprocessing/bin/ruff check keep_preprocessing tests scripts
+      - run: .venv-preprocessing/bin/python scripts/validate_c0014.py --training-python .venv/bin/python --output .keep-work/ci

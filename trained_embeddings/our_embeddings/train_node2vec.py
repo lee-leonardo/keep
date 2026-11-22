@@ -10,10 +10,8 @@
 #SBATCH --output=logs/outputs/output_node2vec.txt
 #SBATCH --error=logs/errors/errors_node2vec.txt
 
-import os
-os.chdir("/gpfs/commons/projects/ukbb-gursoylab/aelhussein")
 import sys
-sys.path.append("/gpfs/commons/projects/ukbb-gursoylab/aelhussein")
+from pathlib import Path
 import pickle
 from node2vec import Node2Vec
 import numpy as np
@@ -95,6 +93,12 @@ def get_vector_iso(code, node_embeddings, index_mapping, mean_vector):
 
 
 if __name__ == "__main__":
+
+    if len(sys.argv) > 1:
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+        from keep_preprocessing.consumers import node2vec_main
+        node2vec_main()
+        raise SystemExit(0)
 
     if TREE == "OMOP":
         with open(f'{HIERARCHY_PATH}/ukbb_omop_tree_filtered.pickle', 'rb') as f:

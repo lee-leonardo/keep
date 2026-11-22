@@ -1,0 +1,17 @@
+{
+  "derivation": "Hand-derived before the exporter: root depth zero; N1..N4 at depths 1..4; B,A,Z at five; X at six. Z has closure ancestry but no direct edge. Two patients each have two distinct X diagnoses; a third has one copied diagnosis.",
+  "concept_ids": ["10", "20", "30", "40", "100", "200", "300"],
+  "depths": [1, 2, 3, 4, 5, 5, 5],
+  "edges": [["10", "20"], ["20", "30"], ["30", "40"], ["40", "100"], ["40", "300"]],
+  "all_retained_X": ["10", "20", "30", "40", "100", "300"],
+  "first_retained_X": ["100", "300"],
+  "retained_A": ["300"],
+  "isolate": "200",
+  "present_patients": ["1", "2"],
+  "unique_diagnoses": 5,
+  "matrix": [[2,2,2,2,2,0,2],[2,2,2,2,2,0,2],[2,2,2,2,2,0,2],[2,2,2,2,2,0,2],[2,2,2,2,2,0,2],[0,0,0,0,0,0,0],[2,2,2,2,2,0,2]],
+  "count_one_Z_diagonal": 1,
+  "narrow_axes": ["100", "200", "300"],
+  "narrow_matrix": [[2,0,2],[0,0,0],[2,0,2]],
+  "projected_histories": [{"patient_id":"2","label":0,"concept_ids":["10","20","30","40","100","300"]}]
+}

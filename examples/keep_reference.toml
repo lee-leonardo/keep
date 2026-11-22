@@ -1,0 +1,22 @@
+# Paths are relative to this config file. Generate these public CSVs first:
+# python -m keep_reference fixture --output .keep-work/common-csv
+schema_version = "keep-reference-config-v1"
+vocabulary_release = "synthetic-c0014-v1"
+fixture_version = "keep-reference-common-v1"
+# Optional: pin the candidate commit selected for an ETL comparison run.
+# expected_keep_head = "REPLACE_WITH_THE_SELECTED_KEEP_COMMIT"
+
+[inputs]
+person = "../.keep-work/common-csv/omop/person.csv"
+visit_occurrence = "../.keep-work/common-csv/omop/visit_occurrence.csv"
+death = "../.keep-work/common-csv/omop/death.csv"
+condition_occurrence = "../.keep-work/common-csv/omop/condition_occurrence.csv"
+CONCEPT = "../.keep-work/common-csv/vocabulary/CONCEPT.csv"
+CONCEPT_RELATIONSHIP = "../.keep-work/common-csv/vocabulary/CONCEPT_RELATIONSHIP.csv"
+CONCEPT_ANCESTOR = "../.keep-work/common-csv/vocabulary/CONCEPT_ANCESTOR.csv"
+VOCABULARY = "../.keep-work/common-csv/vocabulary/VOCABULARY.csv"
+
+[settings]
+max_depth = 5
+target_policy = "all_retained"
+path_source = "closure"

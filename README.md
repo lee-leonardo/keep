@@ -8,6 +8,10 @@ The core workflow involves generating various medical code embeddings and then e
 
 ### 1. Data Preparation (Upstream)
 
+For the KEEP-side independent comparison from common OMOP/Athena CSVs, use [the `keep_reference` interface](docs/keep-reference.md). It exports raw histories, retained/uncut graphs, roll-up targets, patient presence and raw counts with stage provenance for an external ETL harness. This is a labeled reconstruction; the ETL project owns the two-side assertions and presentation notebook.
+
+The fork adds a deterministic preparation command for synthetic OMOP and MIMIC-IV inputs, exact fixture checks, and bundle-backed Node2Vec/GloVe entry points. See [preprocessing setup and commands](docs/preprocessing.md).
+
 While the primary `datasets/` folder is ignored by Git, the script `cohorts_patients/create_cohort_sentence.py` is included. This script appears to be responsible for processing patient data (likely from sources not included in the repository) into sequences suitable for downstream model training and evaluation. Configuration details for data loading during evaluation are found in `extrinsic_evaluation/configs.py` and handled by `extrinsic_evaluation/dataloader.py`.
 
 ### 2. Embedding Generation
