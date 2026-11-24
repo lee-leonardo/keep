@@ -7,7 +7,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from . import SCHEMA_VERSION
+from . import FIXED_PARAMETERS, SCHEMA_VERSION
 from .projection import project, timestamp
 
 TABLES = {
@@ -149,19 +149,7 @@ def validate(directory):
     if manifest["shape"] != [len(ids), len(ids)]:
         raise ValueError("Matrix shape does not match the concept index")
     parameters = manifest["parameters"]
-    fixed_parameters = {
-        "root": "4274025",
-        "depth_measure": "min",
-        "include_root": False,
-        "orphan_rescue": False,
-        "presence_threshold": 2,
-        "threshold_stage": "post_rollup",
-        "diagonal": "patient_prevalence",
-        "history_window": "complete",
-        "count_unit": "patient",
-        "mimic4_time": "admission",
-    }
-    if any(parameters.get(key) != value for key, value in fixed_parameters.items()):
+    if any(parameters.get(key) != value for key, value in FIXED_PARAMETERS.items()):
         raise ValueError("Unsupported preprocessing semantics")
     if parameters.get("target_policy") not in {"all_retained", "first_retained"} or parameters.get(
         "path_source"
@@ -169,8 +157,6 @@ def validate(directory):
         raise ValueError("Unknown roll-up configuration")
     if type(parameters.get("max_depth")) is not int or parameters["max_depth"] < 0:
         raise ValueError("Invalid depth cutoff")
-    if parameters["include_root"] or parameters["orphan_rescue"]:
-        raise ValueError("Schema v1 baseline excludes root and orphan rescue")
     if any(not 1 <= int(row["root_depth"]) <= parameters["max_depth"] for row in concepts):
         raise ValueError("Invalid retained root depth")
     id_set = set(ids)

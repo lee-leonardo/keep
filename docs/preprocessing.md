@@ -4,6 +4,17 @@ This document describes the historical preparation path, which uses PyHealth int
 
 The fork prepares graph, roll-up, diagnosis history and raw patient co-occurrence artifacts through one explicit concept index. `keep_preprocessing` uses the public APIs at [PyHealth `46261db`](https://github.com/lee-leonardo/PyHealth/tree/46261db82f68ecd5820c204f333f288a6720ce13). The author comparison uses the untouched history functions at [KEEP `89cb482`](https://github.com/G2Lab/keep/tree/89cb4823212d1a89cd57bb717731b68e7f10c789).
 
+## Why this preparation exists
+
+The released KEEP repository trains from prepared artifacts whose construction is not part of the release. `trained_embeddings/our_embeddings/train_node2vec.py` loads a pickled hierarchy (`datasets/code_hierarchies/ukbb_omop_tree_filtered.pickle`), and `train_glove.py` loads a pickled co-occurrence matrix plus `code2id`/`code2name` vocabulary pickles (`cooc_ukbb_omop_rollup_lvl_*.pickle` and related files). No released code produces these inputs, so the internal composition of the trained embeddings — membership, roll-up choices, patient counts — cannot be verified from the repository.
+
+This fork closes that gap in two steps:
+
+1. `keep_preprocessing` (this document) rebuilds those artifacts from explicit OMOP or MIMIC-IV and Athena CSV inputs into a versioned, checksummed bundle, and the released training scripts accept such a bundle directly.
+2. [`keep_reference`](keep-reference.md) is a separate standard-library-only implementation of the same four boundaries, written without PyHealth, for independent comparison by an external ETL harness.
+
+The generated fixtures exist so the full bundle contract can be checked end to end without any private data: every fixture row is synthetic, and the hand-derived expectations in `tests/fixtures/` verify the exported graph, roll-up, histories and counts exactly.
+
 ## Install the two CPU environments
 
 Run from this checkout using Python 3.12 and `uv`. PyHealth requires NumPy 2; Node2Vec 0.5.0 declares NumPy below 2. Keep their dependencies in separate environments and exchange only the versioned bundle and indexed `.npz` vectors.

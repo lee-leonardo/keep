@@ -9,7 +9,7 @@ import tempfile
 from collections import Counter
 from pathlib import Path
 
-from . import KEEP_BASE, SCHEMA_VERSION
+from . import FIXED_PARAMETERS, KEEP_BASE, SCHEMA_VERSION
 from .bundle import (
     PAYLOADS,
     digest,
@@ -186,19 +186,10 @@ def build(
         raise ValueError("Output already exists; select a fresh bundle directory")
     runtime, environment = check_runtime()
     parameters = {
-        "root": "4274025",
+        **FIXED_PARAMETERS,
         "max_depth": max_depth,
-        "depth_measure": "min",
         "target_policy": target_policy,
         "path_source": path_source,
-        "include_root": False,
-        "orphan_rescue": False,
-        "presence_threshold": 2,
-        "threshold_stage": "post_rollup",
-        "diagonal": "patient_prevalence",
-        "history_window": "complete",
-        "count_unit": "patient",
-        "mimic4_time": "admission",
     }
     fingerprints = {"source/" + name: digest(source / name) for name in SOURCE_FILES[input_format]}
     for name in VOCABULARY_FILES + (
@@ -340,15 +331,26 @@ def build(
         stats = Counter()
         losses = Counter()
 
+        def rollup_for(code):
+            # Diagnoses can reference codes outside the declared standard
+            # universe (ICD targets, unknown IDs); classify those on first
+            # use instead of materializing every possible code up front.
+            result = mappings.get(code)
+            if result is None:
+                result = mappings[code] = processor.rollup_codes([code])[0]
+            return result
+
         def history_rows():
+            # Fully consuming this generator completes the roll-up universe.
+            # The roll-up exports below must come after this write; validate()
+            # rejects any exported history target without a matching roll-up
+            # row, so reordering fails loudly instead of publishing partials.
             for sample in samples:
                 for condition in sorted(sample["conditions"], key=lambda r: r["diagnosis_id"]):
                     codes = sorted(set(condition["concept_ids"]), key=int)
-                    for code in codes:
-                        if code not in mappings:
-                            mappings[code] = processor.rollup_codes([code])[0]
                     targets = sorted(
-                        {target for code in codes for target in mappings[code].targets}, key=int
+                        {target for code in codes for target in rollup_for(code).targets},
+                        key=int,
                     )
                     reason = condition["unmapped_reason"] or (
                         "mapped" if targets else "empty_rollup"
