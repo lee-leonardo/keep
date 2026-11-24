@@ -1,0 +1,23 @@
+# Hand-derived from the declared CSV fixture, without calling either producer.
+patient_ids = ["1", "2", "3", "4", "5", "6"]
+concept_ids = ["10", "20", "30", "40", "100", "200", "250", "300"]
+depths = [1, 2, 3, 4, 5, 5, 5, 5]
+retained_edges = [["10", "20"], ["20", "30"], ["30", "40"], ["40", "100"], ["40", "300"]]
+X_all_retained = ["10", "20", "30", "40", "100", "300"]
+X_first_retained = ["100", "300"]
+Y_closure_all_retained = ["10", "20", "30", "40", "200"]
+Y_direct = []
+unique_diagnoses = 15
+empty_patient = "5"
+zero_row_concept = "250"
+count_one_concept = "200"
+matrix = [
+  [2,2,2,2,2,0,0,2],
+  [2,2,2,2,2,0,0,2],
+  [2,2,2,2,2,0,0,2],
+  [2,2,2,2,2,0,0,2],
+  [2,2,2,2,2,0,0,2],
+  [0,0,0,0,0,1,0,0],
+  [0,0,0,0,0,0,0,0],
+  [2,2,2,2,2,0,0,2],
+]

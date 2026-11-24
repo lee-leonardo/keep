@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=71"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "keep-preprocessing"
+version = "0.1.0"
+description = "Reproducible, explicitly indexed preprocessing bundles for KEEP"
+requires-python = ">=3.12,<3.13"
+
+[project.scripts]
+keep-preprocessing = "keep_preprocessing.__main__:main"
+keep-reference = "keep_reference.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["keep_preprocessing*", "keep_reference*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

@@ -27,3 +27,8 @@ pretrained_embeddings/data/
 pretrained_embeddings/logs/
 our_embeddings/archive/
 our_embeddings/logs/
+.venv*/
+.keep-work/
+.pytest_cache/
+.ruff_cache/
+!tests/fixtures/expected.json
