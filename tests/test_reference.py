@@ -311,6 +311,52 @@ def test_changed_boundary_artifact_fails_validation(bundle, artifact):
         load_bundle(bundle)
 
 
+@pytest.mark.parametrize("table", ["CONCEPT", "CONCEPT_ANCESTOR", "CONCEPT_RELATIONSHIP"])
+def test_vocabulary_zero_sentinel_does_not_change_reference_outputs(config, tmp_path, table):
+    original = build(config, tmp_path / "original")
+    sentinel_rows = {
+        "CONCEPT": [
+            {
+                "concept_id": "0",
+                "concept_name": "No matching concept",
+                "domain_id": "Metadata",
+                "vocabulary_id": "None",
+                "concept_class_id": "Undefined",
+                "standard_concept": "",
+                "concept_code": "No matching concept",
+                "invalid_reason": "",
+            }
+        ],
+        "CONCEPT_ANCESTOR": [
+            {
+                "ancestor_concept_id": "0",
+                "descendant_concept_id": "0",
+                "min_levels_of_separation": "0",
+                "max_levels_of_separation": "0",
+            }
+        ],
+        "CONCEPT_RELATIONSHIP": [
+            {
+                "concept_id_1": "9001",
+                "concept_id_2": "0",
+                "relationship_id": "Maps to",
+                "invalid_reason": "",
+            },
+            {
+                "concept_id_1": "0",
+                "concept_id_2": "10",
+                "relationship_id": "Is a",
+                "invalid_reason": "",
+            },
+        ],
+    }
+    rewrite_input(config, table, lambda rows: rows + sentinel_rows[table])
+    with_sentinel = build(config, tmp_path / "with-sentinel")
+    assert with_sentinel.manifest["inputs"][table] != original.manifest["inputs"][table]
+    # The sentinel must not enter graphs, observed mapping IDs, roll-up or counts.
+    assert with_sentinel.manifest["artifacts"] == original.manifest["artifacts"]
+
+
 def test_raw_reader_preserves_opaque_ids_and_rejects_conflicts(config):
     def modify(rows):
         p1 = next(r for r in rows if r["person_id"] == "1")

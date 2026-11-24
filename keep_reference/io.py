@@ -46,7 +46,7 @@ def read_csv(path, required, *, athena=False):
             yield row
 
 
-def concept_id(value, *, nullable=False):
+def concept_id(value, *, nullable=False, allow_zero=False):
     if nullable and value in {None, "", "0"}:
         return None
     if not isinstance(value, str) or not re.fullmatch(r"[0-9]+", value.strip()):
@@ -54,7 +54,7 @@ def concept_id(value, *, nullable=False):
     number = int(value)
     if nullable and number == 0:
         return None
-    if number <= 0:
+    if number == 0 and not allow_zero:
         raise ValueError("Concept IDs must be positive")
     return str(number)
 

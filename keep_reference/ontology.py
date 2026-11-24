@@ -61,7 +61,10 @@ def load_ontology(inputs, settings):
         ],
         athena=True,
     ):
-        code = concept_id(row["concept_id"])
+        code = concept_id(row["concept_id"], allow_zero=True)
+        # OMOP's "No matching concept" sentinel is never an ontology node.
+        if code == "0":
+            continue
         if code in concepts:
             raise ValueError("Vocabulary concept identities must be unique")
         concepts[code] = row
@@ -89,9 +92,11 @@ def load_ontology(inputs, settings):
         athena=True,
     ):
         ancestor, descendant = (
-            concept_id(row["ancestor_concept_id"]),
-            concept_id(row["descendant_concept_id"]),
+            concept_id(row["ancestor_concept_id"], allow_zero=True),
+            concept_id(row["descendant_concept_id"], allow_zero=True),
         )
+        if ancestor == "0" or descendant == "0":
+            continue
         minimum, maximum = (
             int(row["min_levels_of_separation"]),
             int(row["max_levels_of_separation"]),
@@ -116,7 +121,12 @@ def load_ontology(inputs, settings):
     ):
         if row["invalid_reason"].strip():
             continue
-        child, parent = concept_id(row["concept_id_1"]), concept_id(row["concept_id_2"])
+        child, parent = (
+            concept_id(row["concept_id_1"], allow_zero=True),
+            concept_id(row["concept_id_2"], allow_zero=True),
+        )
+        if child == "0" or parent == "0":
+            continue
         relation = row["relationship_id"]
         if relation == "Is a" and child in depths and parent in depths and child != parent:
             direct.add((parent, child))
